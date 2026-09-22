@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-
+const bcrypt = require("bcrypt")
 const userSchema = new mongoose.Schema({
     name: {
         required: true,
@@ -12,37 +12,33 @@ const userSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
-    phone:{
-        required:true,
-        type:String,
-        trim:true
+    phone: {
+        required: true,
+        type: String,
+        trim: true
     },
-    password:{
-        required:true,
-        type:String
+    password: {
+        required: true,
+        type: String
     },
-    role:{
-        required:true,
-        type:String,
-        enum:["user", "admin"],
+    role: {
+        required: true,
+        type: String,
+        enum: ["user", "admin"],
         default: "user"
     }
 }, {
     timestamps: true
 });
 
-userSchema.pre("save", async (next) =>{
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return; // only hash if password is new/changed
   const salt = await bcrypt.genSalt(10);
-  this.password= await bcrypt.hash(this.password,salt)
-  next()
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
-userSchema.methods.comparePassword= async (dataPassword) =>{
-  return await bcrypt.compare(dataPassword, this.password);
-}
+userSchema.methods.comparePassword = async function (dataPassword) {
+    return await bcrypt.compare(dataPassword, this.password);
+};
 
 module.exports = mongoose.model("User", userSchema);
-
-
-
-

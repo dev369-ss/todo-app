@@ -12,6 +12,9 @@ app.use(express.json());
 app.get("/",(req,res)=>{
   res.send("Hello from server")
 })
+
+app.use("/api",require("./routes/user.route.js"))
+
 const startServer = async()=>{
 await connectDB();
 
